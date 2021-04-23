@@ -3,14 +3,14 @@ package phase1;
 import java.util.LinkedList;
 import java.util.List;
 
-public class Query {
+public class MyQuery {
 
     private int id;
     private String source;
     private List<String> authors;
     private String query;
 
-    public Query() {
+    public MyQuery() {
         this.authors = new LinkedList<String>();
         this.query = "";
         this.source = "";

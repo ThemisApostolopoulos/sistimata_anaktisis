@@ -7,7 +7,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.LinkedList;
 
-public class DocumentParser {
+public class MyDocumentParser {
 
     private static final char PREFIX = '.';
     private static final char AUTHORS = 'A';
@@ -21,20 +21,20 @@ public class DocumentParser {
     private static final char REFERENCE = 'X';
 
     private BufferedReader reader;
-    private List<Document> documents;
+    private List<MyDocument> documents;
 
-    public DocumentParser(String file) throws FileNotFoundException {
+    public MyDocumentParser(String file) throws FileNotFoundException {
         this.reader = new BufferedReader(new FileReader(new File(file)));
-        this.documents = new LinkedList<Document>();
+        this.documents = new LinkedList<MyDocument>();
     }
 
-    public List<Document> getDocuments() {
+    public List<MyDocument> getDocuments() {
         return documents;
     }
 
     public void parse() throws Exception {
 
-        Document document = null;
+        MyDocument document = null;
         String line = "";
         char state = 0;
         while ((line = reader.readLine()) != null) {
@@ -48,7 +48,7 @@ public class DocumentParser {
                     if (document != null) {
                        documents.add(document);
                     }
-                    document = new Document();
+                    document = new MyDocument();
                     document.setId(Integer.parseInt(line.substring(2).trim()));
                 }
             } else {

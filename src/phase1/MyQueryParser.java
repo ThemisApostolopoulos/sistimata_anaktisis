@@ -4,11 +4,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
-public class QueryParser {
+public class MyQueryParser {
     private static final char PREFIX = '.';
     private static final char AUTHORS = 'A';
     private static final char SOURCE = 'N';
@@ -17,20 +16,20 @@ public class QueryParser {
 
 
     private BufferedReader reader;
-    private List<Query> queries;
+    private List<MyQuery> queries;
 
-    public QueryParser(String file) throws FileNotFoundException {
+    public MyQueryParser(String file) throws FileNotFoundException {
         this.reader = new BufferedReader(new FileReader(new File(file)));
-        this.queries = new LinkedList<Query>();
+        this.queries = new LinkedList<MyQuery>();
     }
 
-    public List<Query> getQueries() {
+    public List<MyQuery> getQueries() {
         return queries;
     }
 
     public void parse() throws Exception {
         //reads and process the queries
-        Query query = null;
+        MyQuery query = null;
         String line = "";
         char state = 0;
 
@@ -44,7 +43,7 @@ public class QueryParser {
                     if (query != null) {
                         queries.add(query);
                     }
-                    query = new Query();
+                    query = new MyQuery();
                     query.setId(Integer.parseInt(line.substring(2).trim()));
                 }
             } else {
