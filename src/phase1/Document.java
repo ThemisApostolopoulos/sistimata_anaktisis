@@ -3,7 +3,7 @@ package phase1;
 import java.util.LinkedList;
 import java.util.List;
 
-public class MyDoc {
+public class Document {
 
     private List<String> authors;
     private String date;
@@ -15,7 +15,7 @@ public class MyDoc {
     private String abstractInfo;
     private List<String> references;
 
-    public MyDoc() {
+    public Document() {
         this.authors = new LinkedList<String>();
         this.references = new LinkedList<String>();
         this.keywords = new LinkedList<String>();
