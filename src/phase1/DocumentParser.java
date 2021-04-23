@@ -1,20 +1,29 @@
 package phase1;
 
+import java.io.FileNotFoundException;
 import java.util.List;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.LinkedList;
 
-public class TXTParsing {
+public class DocumentParser {
+    private BufferedReader reader;
+    private List<Document> documents;
 
-    public static List<Document> parse(String file) throws Exception {
+    public DocumentParser(String file) throws FileNotFoundException {
+        this.reader = new BufferedReader(new FileReader(new File(file)));
+        this.documents = new LinkedList<Document>();
+    }
+
+    public List<Document> getDocuments() {
+        return documents;
+    }
+
+    public void parse() throws Exception {
         //reads and process the documents
         try {
-            BufferedReader reader = new BufferedReader(new FileReader(new File(file)));
             Document document = null;
-            List<Document> documents = new LinkedList<Document>();
-
             String line = "";
             char state = 0;
             while ((line = reader.readLine()) != null) {
@@ -67,10 +76,9 @@ public class TXTParsing {
             }
             documents.add(document);
             reader.close();
-            return documents;
+
         }catch (Throwable err) {
             err.printStackTrace();
-            return null;
         }
     }
 }

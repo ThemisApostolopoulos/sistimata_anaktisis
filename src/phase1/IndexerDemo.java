@@ -34,7 +34,7 @@ import java.util.List;
 public class IndexerDemo {
 
     //input files
-    private String txtfile = "docs//cacm.all";
+    private String docsFile = "docs//cacm.all";
 
     //output files
     private String indexLocation = ("index");
@@ -58,7 +58,9 @@ public class IndexerDemo {
             IndexWriter indexWriter = new IndexWriter(dir, iwc);
 
             // parse txt document using TXT parser and index it
-            List<Document> docs = TXTParsing.parse(txtfile);
+            DocumentParser documentParser = new DocumentParser(docsFile);
+            documentParser.parse();
+            List<Document> docs = documentParser.getDocuments();
             for (Document doc : docs) {
                 indexDoc(indexWriter, doc);
             }
