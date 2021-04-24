@@ -153,6 +153,7 @@ public class Application {
             //for every document
             for(int i=0; i<hits.length; i++){
                 Document hitDoc = indexSearcher.doc(hits[i].doc);
+
                 String docid;
                 if(hitDoc.get("id").length() == 2){
                     docid = "00" + hitDoc.get("id");
@@ -163,7 +164,7 @@ public class Application {
                 }else{
                     docid = hitDoc.get("id");
                 }
-                myWriter.write(qid + " " + docid + "  " + "0 0\n");
+                myWriter.write(qid + " 0 " + docid + " 0 " + hits[i].score + " STANDARD\n");
             }
         }
         myWriter.close();
