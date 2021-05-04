@@ -149,23 +149,28 @@ public class Application {
             }else{
                 qid = String.valueOf(query.getId());
             }
+            if( query.getId() == 34 || query.getId() == 35 || query.getId() == 41 ||  query.getId() == 46 || query.getId() == 47 ||  (query.getId() >=50  && query.getId() <= 56)){
+                System.out.println(qid);
+            }else{
 
-            //for every document
-            for(int i=0; i<hits.length; i++){
-                Document hitDoc = indexSearcher.doc(hits[i].doc);
+                //for every document
+                for(int i=0; i<hits.length; i++){
+                    Document hitDoc = indexSearcher.doc(hits[i].doc);
 
-                String docid;
-                if(hitDoc.get("id").length() == 2){
-                    docid = "00" + hitDoc.get("id");
-                }else if(hitDoc.get("id").length() == 3){
-                    docid = "0" + hitDoc.get("id");
-                }else if(hitDoc.get("id").length() == 1){
-                    docid = "000" + hitDoc.get("id");
-                }else{
-                    docid = hitDoc.get("id");
+                    String docid = hitDoc.get("id");
+                    if(hitDoc.get("id").length() == 2){
+                        docid = "00" + hitDoc.get("id");
+                    }else if(hitDoc.get("id").length() == 3){
+                        docid = "0" + hitDoc.get("id");
+                    }else if(hitDoc.get("id").length() == 1){
+                        docid = "000" + hitDoc.get("id");
+                    }else{
+                        docid = hitDoc.get("id");
+                    }
+                    myWriter.write(qid + "\t0\t" + docid + "\t0\t" + hits[i].score + "\tSTANDARD\n");
                 }
-                myWriter.write(qid + " 0 " + docid + " 0 " + hits[i].score + " STANDARD\n");
             }
+
         }
         myWriter.close();
     }
