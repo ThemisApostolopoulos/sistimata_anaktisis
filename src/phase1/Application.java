@@ -32,7 +32,8 @@ public class Application {
     private String resultsLocation = ("results");
 
     //types and fields
-    private final String searchField = "title";
+    private final String searchField = "multipleFields";
+
 
     public Application() throws Exception {
         createDocumentIndex();
@@ -90,14 +91,17 @@ public class Application {
             }
             StoredField entrydate = new StoredField("entrydate", mydoc.getEntrydate());
             doc.add(entrydate);
-            TextField title = new TextField("title", mydoc.getTitle(), Field.Store.YES);
+            StoredField title = new StoredField("title", mydoc.getTitle());
             doc.add(title);
             StoredField abstractInfo= new StoredField("abstractInfo", mydoc.getAbstractInfo());
             doc.add(abstractInfo);
             String fullSearchableText = mydoc.getId() + " " + mydoc.getAuthors() + " " + mydoc.getDate() + " " +
                     mydoc.getContent() + mydoc.getKeywords() + " " + mydoc.getEntrydate() + " " +
                     mydoc.getTitle() + " " + mydoc.getAbstractInfo() ;
-            StringField reference = new StringField("reference", fullSearchableText, Field.Store.NO);
+            StoredField reference = new StoredField("reference", fullSearchableText);
+            String searchField = mydoc.getTitle() + " " + mydoc.getAuthors() + " " + mydoc.getKeywords() + " " + mydoc.getAbstractInfo();
+            TextField multipleFields = new TextField("multipleFields", searchField, Field.Store.NO);
+            doc.add(multipleFields);
 
 
             doc.add(reference);
