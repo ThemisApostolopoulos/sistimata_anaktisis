@@ -37,7 +37,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../AUEB2/retrieval systems/lucene-7.7.3/classification/lucene-classification-7.7.3.jar!/" />
+          <root url="jar://$MODULE_DIR$/lucene/lucene-classification-7.7.3.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
