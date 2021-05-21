@@ -11,8 +11,11 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
 import phase1.MyDocument;
 import phase1.MyDocumentParser;
+import phase1.MyQuery;
+import phase1.MyQueryParser;
 
 import java.io.FileWriter;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.List;
@@ -21,13 +24,98 @@ public class Application {
 
     //input files
     private String docsFile = "docs//cacm.all";
+    private String queryFile = "docs//query.text";
 
     //output files
     private String indexLocation = ("index2");
 
 
     public Application() throws Exception {
-        createDocumentIndex();
+        //createDocumentIndex();
+        createQueriesIndex();
+    }
+
+    private void createQueriesIndex() throws Exception {
+        StandardAnalyzer analyzer = new StandardAnalyzer();
+        Similarity similarity = new ClassicSimilarity();
+        Directory index = new RAMDirectory();
+        IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
+        iwc.setSimilarity(similarity);
+
+
+        // iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
+
+        // create the IndexWriter with the configuration as above
+        IndexWriter indexWriter = new IndexWriter(index, iwc);
+        MyQueryParser queryParser = new MyQueryParser(queryFile);
+        queryParser.parse();
+        List<MyQuery> queries = queryParser.getQueries();
+        for (MyQuery query : queries) {
+            indexQuery(indexWriter, query);
+        }
+        indexWriter.close();
+        IndexReader reader = DirectoryReader.open(index);
+        testSparseFreqDoubleArrayConversionQuery(reader);
+        reader.close();
+
+    }
+
+
+
+    private void indexQuery(IndexWriter indexWriter, MyQuery query) {
+        FieldType type = new FieldType();
+        type.setIndexOptions(IndexOptions.DOCS_AND_FREQS);
+        type.setTokenized(true);
+        type.setStored(true);
+        type.setStoreTermVectors(true);
+
+        try {
+            // make a new, empty document
+            Document q = new Document();
+            // create the fields of the document and add them to the document
+
+            Field queryField = new Field("queryField", query.getQuery(), type);
+            q.add(queryField);
+
+            indexWriter.addDocument(q);
+
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private void testSparseFreqDoubleArrayConversionQuery(IndexReader reader) throws IOException {
+        Terms fieldTerms = MultiFields.getTerms(reader, "queryField");   //the number of terms in the lexicon after analysis of the Field "title"
+        System.out.println("Terms:" + fieldTerms.size());
+
+        TermsEnum it = fieldTerms.iterator();						//iterates through the terms of the lexicon
+        while(it.next() != null) {
+            System.out.print(it.term().utf8ToString() + " "); 		//prints the terms
+        }
+        System.out.println();
+        System.out.println();
+        if (fieldTerms != null && fieldTerms.size() != -1) {
+            IndexSearcher indexSearcher = new IndexSearcher(reader);
+            FileWriter myWriter;
+            myWriter = new FileWriter("results2//queryResults.txt");
+            for (ScoreDoc scoreQuery : indexSearcher.search(new MatchAllDocsQuery(), Integer.MAX_VALUE).scoreDocs) {   //retrieves all documents
+                System.out.println("QueryID: " + scoreQuery.doc);
+                Terms docTerms = reader.getTermVector(scoreQuery.doc, "queryField");
+
+                Double[] vector = DocToDoubleVectorUtils.toSparseLocalFreqDoubleArray(docTerms, fieldTerms); //creates document's vector
+                if(vector == null){
+                    System.err.println("Document " + scoreQuery.doc + " had a null terms vector for body");
+                }else{
+                    NumberFormat nf = new DecimalFormat("0.#");
+                    System.out.println(vector.length-1 + "\n");
+                    for(int i = 0; i<=vector.length-1; i++ ) {
+                        myWriter.write(nf.format(vector[i])+ " ");
+                    }
+                    myWriter.write("\n");
+                }
+
+            }
+        }
     }
 
     private void createDocumentIndex() throws Exception {
@@ -38,10 +126,6 @@ public class Application {
         Directory index = new RAMDirectory();
         IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
         iwc.setSimilarity(similarity);
-
-
-
-
 
 
        // iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
@@ -59,7 +143,7 @@ public class Application {
         indexWriter.close();
 
         IndexReader reader = DirectoryReader.open(index);
-        testSparseFreqDoubleArrayConversion(reader);
+        testSparseFreqDoubleArrayConversionDocument(reader);
         reader.close();
         }
 
@@ -99,7 +183,7 @@ public class Application {
         }
     }
 
-    private static void testSparseFreqDoubleArrayConversion(IndexReader reader) throws Exception {
+    private static void testSparseFreqDoubleArrayConversionDocument(IndexReader reader) throws Exception {
 
         Terms fieldTerms = MultiFields.getTerms(reader, "multipleFields");   //the number of terms in the lexicon after analysis of the Field "title"
         System.out.println("Terms:" + fieldTerms.size());
@@ -127,12 +211,14 @@ public class Application {
                     for(int i = 0; i<=vector.length-1; i++ ) {
                         myWriter.write(nf.format(vector[i])+ " ");
                     }
-                    myWriter.write("Doc id: " + scoreDoc.doc +"\n");
+                    myWriter.write("\n");
                 }
 
             }
         }
     }
+
+
 
     public static void main(String[] args) {
         try {
