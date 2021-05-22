@@ -31,8 +31,8 @@ public class Application {
 
 
     public Application() throws Exception {
-        //createDocumentIndex();
-        createQueriesIndex();
+        createDocumentIndex();
+        //createQueriesIndex();
     }
 
     private void createQueriesIndex() throws Exception {
@@ -60,8 +60,6 @@ public class Application {
 
     }
 
-
-
     private void indexQuery(IndexWriter indexWriter, MyQuery query) {
         FieldType type = new FieldType();
         type.setIndexOptions(IndexOptions.DOCS_AND_FREQS);
@@ -74,8 +72,9 @@ public class Application {
             Document q = new Document();
             // create the fields of the document and add them to the document
 
-            Field queryField = new Field("queryField", query.getQuery(), type);
-            q.add(queryField);
+            //FIXME chnage multipleFields with queryField
+            Field multipleFields = new Field("multipleFields", query.getQuery(), type);
+            q.add(multipleFields);
 
             indexWriter.addDocument(q);
 
@@ -85,7 +84,8 @@ public class Application {
     }
 
     private void testSparseFreqDoubleArrayConversionQuery(IndexReader reader) throws IOException {
-        Terms fieldTerms = MultiFields.getTerms(reader, "queryField");   //the number of terms in the lexicon after analysis of the Field "title"
+        //FIXME chnage multipleFields with queryField
+        Terms fieldTerms = MultiFields.getTerms(reader, "multipleFields");   //the number of terms in the lexicon after analysis of the Field "title"
         System.out.println("Terms:" + fieldTerms.size());
 
         TermsEnum it = fieldTerms.iterator();						//iterates through the terms of the lexicon
@@ -99,24 +99,32 @@ public class Application {
             FileWriter myWriter;
             myWriter = new FileWriter("results2//queryResults.txt");
             for (ScoreDoc scoreQuery : indexSearcher.search(new MatchAllDocsQuery(), Integer.MAX_VALUE).scoreDocs) {   //retrieves all documents
-                System.out.println("QueryID: " + scoreQuery.doc);
-                Terms docTerms = reader.getTermVector(scoreQuery.doc, "queryField");
+                if(scoreQuery.doc > 3202){
+                    System.out.println("QueryID: " + scoreQuery.doc);
 
-                Double[] vector = DocToDoubleVectorUtils.toSparseLocalFreqDoubleArray(docTerms, fieldTerms); //creates document's vector
-                if(vector == null){
-                    System.err.println("Document " + scoreQuery.doc + " had a null terms vector for body");
-                }else{
-                    NumberFormat nf = new DecimalFormat("0.#");
-                    System.out.println(vector.length-1 + "\n");
-                    for(int i = 0; i<=vector.length-1; i++ ) {
-                        myWriter.write(nf.format(vector[i])+ " ");
+                    //FIXME chnage multipleFields with queryField
+                    Terms docTerms = reader.getTermVector(scoreQuery.doc, "multipleFields");
+
+                    Double[] vector = DocToDoubleVectorUtils.toSparseLocalFreqDoubleArray(docTerms, fieldTerms); //creates document's vector
+                    if(vector == null){
+                        System.err.println("Document " + scoreQuery.doc + " had a null terms vector for body");
+                    }else{
+                        NumberFormat nf = new DecimalFormat("0.#");
+                        System.out.println(vector.length-1 + "\n");
+                        for(int i = 0; i<=vector.length-1; i++ ) {
+                            myWriter.write(nf.format(vector[i])+ " ");
+                        }
+                        myWriter.write("\n");
                     }
-                    myWriter.write("\n");
                 }
+
 
             }
         }
     }
+
+
+
 
     private void createDocumentIndex() throws Exception {
         //Directory index = FSDirectory.open(Paths.get(indexLocation));
@@ -128,7 +136,6 @@ public class Application {
         iwc.setSimilarity(similarity);
 
 
-       // iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
 
         // create the IndexWriter with the configuration as above
         IndexWriter indexWriter = new IndexWriter(index, iwc);
@@ -140,10 +147,18 @@ public class Application {
         for (MyDocument doc : docs) {
             indexDoc(indexWriter, doc);
         }
+
+        MyQueryParser queryParser = new MyQueryParser(queryFile);
+        queryParser.parse();
+        List<MyQuery> queries = queryParser.getQueries();
+        for (MyQuery query : queries) {
+            indexQuery(indexWriter, query);
+        }
         indexWriter.close();
 
         IndexReader reader = DirectoryReader.open(index);
         testSparseFreqDoubleArrayConversionDocument(reader);
+        testSparseFreqDoubleArrayConversionQuery(reader);
         reader.close();
         }
 
@@ -158,21 +173,9 @@ public class Application {
             // make a new, empty document
             org.apache.lucene.document.Document doc = new org.apache.lucene.document.Document();
             // create the fields of the document and add them to the document
-
-            Field abstractInfo = new Field("abstractInfo", mydoc.getAbstractInfo(), type);
-            doc.add(abstractInfo);
-            Field title = new Field("title", mydoc.getAbstractInfo(), type);
-            doc.add(title);
-            Field authors = new Field("authors", mydoc.getAbstractInfo(), type);
-            doc.add(authors);
-            Field keywords = new Field("keywords", mydoc.getAbstractInfo(), type);
-            doc.add(keywords);
-
             String searchField = mydoc.getTitle() + " " + mydoc.getAuthors() + " " + mydoc.getKeywords() + " " + mydoc.getAbstractInfo();
             Field multipleFields = new Field("multipleFields", searchField, type);
             doc.add(multipleFields);
-
-
 
 
             System.out.println("adding " + mydoc);
@@ -199,20 +202,23 @@ public class Application {
             FileWriter myWriter;
             myWriter = new FileWriter("results2//results.txt");
             for (ScoreDoc scoreDoc : indexSearcher.search(new MatchAllDocsQuery(), Integer.MAX_VALUE).scoreDocs) {   //retrieves all documents
-                System.out.println("DocID: " + scoreDoc.doc);
-                Terms docTerms = reader.getTermVector(scoreDoc.doc, "multipleFields");
+                if(scoreDoc.doc <= 3202){
+                    System.out.println("DocID: " + scoreDoc.doc);
+                    Terms docTerms = reader.getTermVector(scoreDoc.doc, "multipleFields");
 
-                Double[] vector = DocToDoubleVectorUtils.toSparseLocalFreqDoubleArray(docTerms, fieldTerms); //creates document's vector
-                if(vector == null){
-                    System.err.println("Document " + scoreDoc.doc + " had a null terms vector for body");
-                }else{
-                    NumberFormat nf = new DecimalFormat("0.#");
-                    System.out.println(vector.length-1 + "\n");
-                    for(int i = 0; i<=vector.length-1; i++ ) {
-                        myWriter.write(nf.format(vector[i])+ " ");
+                    Double[] vector = DocToDoubleVectorUtils.toSparseLocalFreqDoubleArray(docTerms, fieldTerms); //creates document's vector
+                    if(vector == null){
+                        System.err.println("Document " + scoreDoc.doc + " had a null terms vector for body");
+                    }else{
+                        NumberFormat nf = new DecimalFormat("0.#");
+                        System.out.println(vector.length-1 + "\n");
+                        for(int i = 0; i<=vector.length-1; i++ ) {
+                            myWriter.write(nf.format(vector[i])+ " ");
+                        }
+                        myWriter.write("\n");
                     }
-                    myWriter.write("\n");
                 }
+
 
             }
         }
