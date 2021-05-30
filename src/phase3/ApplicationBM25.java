@@ -13,7 +13,7 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
-import org.apache.lucene.search.similarities.ClassicSimilarity;
+import org.apache.lucene.search.similarities.*;
 import org.apache.lucene.search.similarities.Similarity;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
@@ -34,7 +34,7 @@ public class ApplicationBM25 {
 
     //output files
     private String indexLocation = ("index");
-    private String resultsLocation = ("results");
+    private String resultsLocation = ("results3//BM25//");
 
     //types and fields
     private final String searchField = "multipleFields";
@@ -52,7 +52,7 @@ public class ApplicationBM25 {
         // define which analyzer to use for the normalization of documents
         StandardAnalyzer analyzer = new StandardAnalyzer();
         // define retrieval model
-        Similarity similarity = new CBM25Similarity();
+        Similarity similarity = new BM25Similarity();
         // configure IndexWriter
         IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
         iwc.setSimilarity(similarity);
@@ -124,7 +124,7 @@ public class ApplicationBM25 {
     private void searcher(int i) throws Exception {
         IndexReader indexReader = DirectoryReader.open(FSDirectory.open(Paths.get(indexLocation))); //IndexReader is an abstract class, providing an interface for accessing an index.
         IndexSearcher indexSearcher = new IndexSearcher(indexReader); //Creates a searcher searching the provided index, Implements search over a single IndexReader.
-        indexSearcher.setSimilarity(new CBM25Similarity());
+        indexSearcher.setSimilarity(new BM25Similarity());
 
         search(indexSearcher, searchField, i);
         indexReader.close();
@@ -140,11 +140,11 @@ public class ApplicationBM25 {
         FileWriter myWriter;
         //for different number of results
         if(numberOfResults == 20){
-            myWriter = new FileWriter("results//results1.txt");
+            myWriter = new FileWriter(resultsLocation + "result1.txt");
         }else if(numberOfResults == 30){
-            myWriter = new FileWriter("results//results2.txt");
+            myWriter = new FileWriter(resultsLocation + "result2.txt");
         }else{
-            myWriter = new FileWriter("results//results3.txt");
+            myWriter = new FileWriter(resultsLocation + "result3.txt");
         }
         //for every query
         for (MyQuery query : queries) {
