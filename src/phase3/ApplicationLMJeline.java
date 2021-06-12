@@ -128,7 +128,7 @@ public class ApplicationLMJeline {
     private void searcher(int i) throws Exception {
         IndexReader indexReader = DirectoryReader.open(FSDirectory.open(Paths.get(indexLocation))); //IndexReader is an abstract class, providing an interface for accessing an index.
         IndexSearcher indexSearcher = new IndexSearcher(indexReader); //Creates a searcher searching the provided index, Implements search over a single IndexReader.
-        indexSearcher.setSimilarity(new LMJelinekMercerSimilarity((float) 0.1));
+        indexSearcher.setSimilarity(new LMJelinekMercerSimilarity((float) 0.7));
 
         search(indexSearcher, searchField, i);
         indexReader.close();
